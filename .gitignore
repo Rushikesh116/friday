@@ -1,0 +1,18 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Large or machine-specific (setup.sh downloads the speech model; make-app.sh builds the app)
+models/
+build/
+
+# Personal data: chats, memory, settings, task history, briefs
+data/
+
+# Local backups and reference images (third-party, not ours to publish)
+.backup-*/
+ref_images/
+
+# macOS
+.DS_Store

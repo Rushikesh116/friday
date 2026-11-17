@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src * data: blob:; connect-src 'self' ws://127.0.0.1:* ws://localhost:* wss://*.ts.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Friday</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body data-token="__FRIDAY_TOKEN__">
+<div class="backdrop" aria-hidden="true"></div>
+
+<div class="app">
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><span></span></div>
+      <div>
+        <div class="brand-name" id="brand-name">FRIDAY</div>
+        <div class="brand-sub">Command Center</div>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav" aria-label="Sections">
+      <button data-view="overview" class="active"><i data-icon="grid"></i><span>Command Center</span></button>
+      <button data-view="chat"><i data-icon="chat"></i><span>Chat</span><b class="badge" id="badge-chat" hidden></b></button>
+      <button data-view="agents"><i data-icon="agents"></i><span>Agents &amp; Tasks</span><b class="badge" id="badge-agents" hidden></b></button>
+      <button data-view="research"><i data-icon="globe"></i><span>Research</span><b class="badge" id="badge-research" hidden></b></button>
+      <button data-view="schedules"><i data-icon="clock"></i><span>Schedules</span><b class="badge" id="badge-schedules" hidden></b></button>
+      <button data-view="memory"><i data-icon="memory"></i><span>Memory</span><b class="badge muted" id="badge-memory" hidden></b></button>
+      <button data-view="settings"><i data-icon="gear"></i><span>Settings</span></button>
+    </nav>
+
+    <section class="voice-card">
+      <header>
+        <span class="label">Voice</span>
+        <span class="voice-state" id="voice-state">Starting…</span>
+      </header>
+      <canvas class="wave" id="side-wave" aria-hidden="true"></canvas>
+      <button class="mic-btn" id="mic-btn" data-action="mic" aria-label="Talk to Friday">
+        <span class="mic-ring"></span><span class="mic-ring r2"></span>
+        <i data-icon="mic"></i>
+      </button>
+      <div class="mic-hint" id="mic-hint">Tap to speak</div>
+      <div class="heard" id="heard" hidden></div>
+
+      <div class="controls">
+        <label class="switch-row">
+          <span><i data-icon="power"></i>Assistant</span>
+          <input type="checkbox" id="ctl-power" data-action="power"><span class="switch"></span>
+        </label>
+        <div class="seg" role="radiogroup" aria-label="Listening mode">
+          <button data-action="mode" data-mode="always" id="mode-always" title="Her name wakes her">Always on</button>
+          <button data-action="mode" data-mode="ptt" id="mode-ptt">Push to talk</button>
+        </div>
+        <label class="switch-row">
+          <span><i data-icon="speaker"></i>Voice replies</span>
+          <input type="checkbox" id="ctl-replies" data-action="replies"><span class="switch"></span>
+        </label>
+      </div>
+    </section>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <header class="topbar">
+      <div class="sys-pill" id="sys-pill"><span class="lbl">System status</span><span class="dot"></span><b id="sys-text">Connecting</b></div>
+      <form class="ask" id="ask-form" autocomplete="off">
+        <i data-icon="sparkles"></i>
+        <input id="ask-input" type="text" placeholder="Ask Friday anything…" maxlength="2000" aria-label="Ask Friday">
+        <kbd>↵</kbd>
+      </form>
+      <div class="clock"><div id="clock-date">&nbsp;</div><div id="clock-time">--:--</div></div>
+      <div class="top-actions">
+        <button class="icon-btn" id="bell" data-action="open-approvals" aria-label="Approvals"><i data-icon="bell"></i><b class="badge" id="badge-bell" hidden></b></button>
+        <button class="icon-btn" data-view-link="settings" aria-label="Settings"><i data-icon="gear"></i></button>
+      </div>
+    </header>
+
+    <div class="banner" id="banner" hidden></div>
+
+    <div class="views">
+      <!-- ---------- Command Center ---------- -->
+      <section class="view active" id="view-overview">
+        <div class="grid">
+          <article class="panel p-core">
+            <h2>Core Overview</h2>
+            <ul class="core-list" id="core-list"></ul>
+          </article>
+
+          <article class="panel p-orb">
+            <canvas id="orb" aria-hidden="true"></canvas>
+            <div class="orb-text">
+              <div class="orb-name" id="orb-name">FRIDAY</div>
+              <div class="orb-status" id="orb-status">STARTING</div>
+              <div class="orb-sub" id="orb-sub"></div>
+            </div>
+            <div class="orb-heard" id="orb-heard"></div>
+          </article>
+
+          <article class="panel p-feed">
+            <h2>Live Activity <span class="live-tag">Live</span></h2>
+            <ul class="feed" id="feed"></ul>
+          </article>
+
+          <article class="panel p-agents">
+            <h2>Active Agents <a data-view-link="agents">View all ›</a></h2>
+            <div class="agent-cards" id="agent-cards"></div>
+          </article>
+
+          <article class="panel p-timeline">
+            <h2>Today <a data-view-link="schedules">Schedules ›</a></h2>
+            <ul class="timeline" id="timeline"></ul>
+          </article>
+
+          <article class="panel p-quick">
+            <h2>Quick Commands</h2>
+            <div class="quick">
+              <button data-action="quick-task"><i data-icon="plus"></i>Start new task</button>
+              <button data-action="quick-research"><i data-icon="globe"></i>Research a topic</button>
+              <button data-action="briefing"><i data-icon="sun"></i>Daily briefing</button>
+              <button data-action="quick-mail"><i data-icon="mail"></i>Check my email</button>
+              <button data-action="new-conversation"><i data-icon="refresh"></i>New conversation</button>
+            </div>
+          </article>
+
+          <article class="panel p-system">
+            <h2>System Monitor</h2>
+            <div class="rings" id="rings"></div>
+            <div class="sys-foot" id="sys-foot"></div>
+          </article>
+
+          <article class="panel p-research">
+            <h2>Latest Research <a data-view-link="research">All briefs ›</a></h2>
+            <div id="latest-brief"></div>
+          </article>
+
+          <article class="panel p-model">
+            <h2>Model &amp; Usage</h2>
+            <div id="model-panel"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ---------- Chat ---------- -->
+      <section class="view" id="view-chat">
+        <div class="chat-layout" id="chat-layout">
+        <aside class="threads panel" id="threads">
+          <h2>Chats <span class="h-actions"><button class="ghost sm" data-action="new-conversation" title="Start a new chat"><i data-icon="plus"></i>New</button></span></h2>
+          <div class="thread-list" id="thread-list"></div>
+        </aside>
+        <div class="chat-wrap panel">
+          <h2><button class="ghost sm threads-toggle" data-action="threads-toggle" title="Show all chats"><i data-icon="chat"></i>Chats</button><span class="chat-title" id="chat-title">Conversation</span> <span class="h-actions"><button class="ghost sm" data-action="thread-rename" title="Rename this chat"><i data-icon="edit"></i></button><button class="ghost sm" data-action="new-conversation"><i data-icon="plus"></i>New chat</button></span></h2>
+          <div class="chat-log" id="chat-log" aria-live="polite"></div>
+          <div class="working" id="chat-working" hidden></div>
+          <form class="composer" id="chat-form" autocomplete="off">
+            <textarea id="chat-input" rows="2" maxlength="8000" placeholder="Message Friday… (Enter to send, Shift+Enter for a new line)"></textarea>
+            <div class="composer-actions">
+              <button type="button" class="ghost sm" data-action="chat-as-task" title="Hand this to a background agent">Run as task</button>
+              <button type="button" class="ghost sm" data-action="chat-as-research" title="Research this and show a brief">Research</button>
+              <button type="submit" class="primary"><i data-icon="send"></i>Send</button>
+            </div>
+          </form>
+        </div>
+        </div>
+      </section>
+
+      <!-- ---------- Agents ---------- -->
+      <section class="view" id="view-agents">
+        <div class="agents-layout">
+          <div class="agents-left">
+            <article class="panel">
+              <h2>New Task</h2>
+              <form id="task-form" class="task-form" autocomplete="off">
+                <input id="task-title" type="text" maxlength="90" placeholder="Title (optional)">
+                <textarea id="task-prompt" rows="3" maxlength="8000" placeholder="What should a background agent do? e.g. “Compare the three best noise-cancelling headphones under $300 and save a table to my Desktop.”"></textarea>
+                <div class="row">
+                  <label class="check"><input type="checkbox" id="task-speak"> Read the result aloud</label>
+                  <button type="submit" class="primary"><i data-icon="play"></i>Start agent</button>
+                </div>
+              </form>
+            </article>
+            <article class="panel grow">
+              <h2>Agents <span class="h-actions seg small" id="agent-filter">
+                <button data-action="agent-filter" data-filter="active" class="on">Active</button>
+                <button data-action="agent-filter" data-filter="all">All</button>
+              </span></h2>
+              <div class="agent-stats" id="agent-stats"></div>
+              <div class="run-list" id="run-list"></div>
+            </article>
+          </div>
+          <article class="panel run-detail" id="run-detail"></article>
+        </div>
+      </section>
+
+      <!-- ---------- Research ---------- -->
+      <section class="view" id="view-research">
+        <article class="panel research-hero">
+          <h2>Researcher</h2>
+          <form id="research-form" class="research-form" autocomplete="off">
+            <i data-icon="globe"></i>
+            <input id="research-input" type="text" maxlength="300" placeholder="What do you want explained? e.g. “What happened to Nvidia's stock this month?”">
+            <label class="check"><input type="checkbox" id="research-speak" checked> Read summary aloud</label>
+            <button type="submit" class="primary"><i data-icon="sparkles"></i>Research</button>
+          </form>
+          <div class="research-active" id="research-active"></div>
+        </article>
+        <div class="brief-grid" id="brief-grid"></div>
+      </section>
+
+      <!-- ---------- Schedules ---------- -->
+      <section class="view" id="view-schedules">
+        <article class="panel">
+          <h2>Schedules <span class="h-actions">
+            <label class="switch-row inline"><span>Run schedules</span><input type="checkbox" id="ctl-schedules" data-action="schedules-enabled"><span class="switch"></span></label>
+            <button class="primary sm" data-action="schedule-new"><i data-icon="plus"></i>New schedule</button>
+          </span></h2>
+          <div id="schedule-list"></div>
+        </article>
+      </section>
+
+      <!-- ---------- Memory ---------- -->
+      <section class="view" id="view-memory">
+        <article class="panel">
+          <h2>Memory</h2>
+          <p class="hint">Things Friday knows about you. She reads these at the start of every conversation. You can also just tell her: “Friday, remember that I prefer short emails.”</p>
+          <form id="memory-form" class="inline-form" autocomplete="off">
+            <input id="memory-input" type="text" maxlength="300" placeholder="Add a note, e.g. “My advisor is Dr. Lee (lee@university.edu)”">
+            <button type="submit" class="primary"><i data-icon="plus"></i>Remember</button>
+          </form>
+          <ul class="memory-list" id="memory-list"></ul>
+        </article>
+      </section>
+
+      <!-- ---------- Settings ---------- -->
+      <section class="view" id="view-settings">
+        <div class="settings-grid" id="settings"></div>
+      </section>
+    </div>
+
+    <footer class="bottombar">
+      <div class="chip" id="chip-weather"></div>
+      <div class="chip" id="chip-network"></div>
+      <div class="talk-zone">
+        <canvas class="talk-wave left" id="talk-wave-l" aria-hidden="true"></canvas>
+        <button class="talk-pill" id="talk-pill" data-action="talk-pill">
+          <b id="talk-title">TALK TO FRIDAY</b>
+          <span id="talk-sub">Starting…</span>
+        </button>
+        <canvas class="talk-wave right" id="talk-wave-r" aria-hidden="true"></canvas>
+      </div>
+      <button class="briefing-btn" data-action="briefing"><i data-icon="sun"></i>Daily Briefing</button>
+    </footer>
+  </main>
+</div>
+
+<!-- ============ OVERLAYS ============ -->
+<div class="overlay approval-overlay" id="approval-overlay" hidden>
+  <div class="modal approval" role="alertdialog" aria-modal="true" aria-labelledby="approval-title">
+    <div class="modal-head warn"><i data-icon="shield"></i><h3 id="approval-title">Needs your OK</h3><span id="approval-count"></span></div>
+    <div class="approval-agent" id="approval-agent"></div>
+    <p class="approval-spoken" id="approval-spoken"></p>
+    <pre class="approval-detail" id="approval-detail"></pre>
+    <p class="hint" id="approval-hint"></p>
+    <div class="modal-actions">
+      <button class="danger" data-action="approve-no"><i data-icon="x"></i>Decline</button>
+      <button class="primary" data-action="approve-yes"><i data-icon="check"></i>Approve</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay brief-overlay" id="brief-overlay" hidden>
+  <div class="brief" role="dialog" aria-modal="true" aria-labelledby="brief-title" id="brief"></div>
+</div>
+
+<div class="overlay" id="schedule-overlay" hidden>
+  <form class="modal schedule-editor" id="schedule-form" autocomplete="off">
+    <div class="modal-head"><i data-icon="clock"></i><h3 id="schedule-editor-title">New schedule</h3>
+      <button type="button" class="icon-btn" data-action="schedule-close" aria-label="Close"><i data-icon="x"></i></button></div>
+    <label>Name<input id="sch-name" type="text" maxlength="80" placeholder="Morning email summary" required></label>
+    <label>What should Friday do?<textarea id="sch-prompt" rows="3" maxlength="4000" placeholder="Summarize my unread email and today's calendar." required></textarea></label>
+    <div class="row2">
+      <label>Repeat
+        <select id="sch-kind">
+          <option value="daily">Every day</option>
+          <option value="weekly">On certain days</option>
+          <option value="interval">Every few minutes / hours</option>
+          <option value="once">Once</option>
+        </select>
+      </label>
+      <label data-for="daily weekly">Time<input id="sch-time" type="time" value="08:00"></label>
+      <label data-for="interval">Every
+        <span class="every"><input id="sch-every" type="number" min="1" max="10080" value="1"><select id="sch-every-unit"><option value="1">minutes</option><option value="60" selected>hours</option></select></span>
+      </label>
+      <label data-for="once">Date &amp; time<input id="sch-at" type="datetime-local"></label>
+    </div>
+    <div class="days" data-for="weekly" id="sch-days"></div>
+    <label class="check"><input type="checkbox" id="sch-speak"> Read the result aloud when it runs</label>
+    <p class="form-error" id="sch-error" hidden></p>
+    <div class="modal-actions">
+      <button type="button" class="ghost" data-action="schedule-close">Cancel</button>
+      <button type="submit" class="primary"><i data-icon="check"></i>Save schedule</button>
+    </div>
+  </form>
+</div>
+
+<div class="overlay" id="prompt-overlay" hidden>
+  <form class="modal" id="prompt-form" autocomplete="off">
+    <div class="modal-head"><i data-icon="sparkles" id="prompt-icon"></i><h3 id="prompt-title"></h3>
+      <button type="button" class="icon-btn" data-action="prompt-close" aria-label="Close"><i data-icon="x"></i></button></div>
+    <textarea id="prompt-input" rows="3" maxlength="8000"></textarea>
+    <div class="modal-actions">
+      <button type="button" class="ghost" data-action="prompt-close">Cancel</button>
+      <button type="submit" class="primary" id="prompt-submit">Start</button>
+    </div>
+  </form>
+</div>
+
+<div class="lightbox" id="lightbox" hidden></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script type="module" src="/static/app.js"></script>
+</body>
+</html>
